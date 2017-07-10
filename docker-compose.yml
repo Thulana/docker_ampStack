@@ -1,0 +1,69 @@
+version: '2'
+services:
+  nginx:
+    build:
+      context: .
+      dockerfile: ./nginx/Dockerfile
+    image: "nginx"
+    ports:
+      - 7070:443
+      - 9090:80
+    volumes: 
+      - ./nginx/log:/var/log/nginx
+      - ./nginx/ssl:/etc/ssl/certs
+      - ./nginx/private:/etc/ssl/private
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+      - ./nginx/conf:/etc/nginx
+    environment:
+      - DEFAULT_HOST=apache
+    links:
+      - apache:apache
+    restart: always
+
+  apache:
+    build:
+      context: .
+      dockerfile: ./apache/Dockerfile
+    image: "php:5.5-apache-server"
+    volumes: 
+      - ./apache/web:/var/www/html
+      - ./apache/conf:/var/conf
+    links:
+      - mysql:dbserver
+    environment:
+      - DATABASE
+      - MYSQL_PASSWORD
+      - MYSQL_USER
+    restart: always
+
+ 
+  mysql:
+    image: "mysqlserver"
+    build:
+      context: .
+      dockerfile: ./mysql/dockerfile
+    volumes: 
+      - ./mysql/sql:/docker-entrypoint-initdb.d/
+      - ./mysql/conf:/var/conf
+    environment:
+      - MYSQL_ROOT_PASSWORD
+      - MYSQL_PASSWORD
+      - MYSQL_USER
+    restart: always 
+
+     
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
